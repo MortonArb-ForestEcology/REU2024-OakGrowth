@@ -5,3 +5,4 @@
 # 
 # 2. Delete 0s in the first rings --> Miranda discovered after the fact that some of the inner rings couldn't be measured and we need to get rid of the 0s
 # 3. Figure out how to crossdate in R
+#4. Test
