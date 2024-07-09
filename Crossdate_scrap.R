@@ -14,7 +14,8 @@ rwlunk008 <- as.rwl(Unk8msr)
 
 print (rwlunk008)
 
-### 
+
+
 #attenpting to read in information from all of the xml files
 # List all TRIDAS XML files in your working directory
 trifi <- list.files(pattern = ".xml$", full.names = TRUE)
@@ -38,66 +39,34 @@ rwl.objs <- as.rwl(trimeas)
 rwl.obj[[file]] <- rwl.objs
  })}
 
-print(rwl.objs)  # Print the first RWL object, adjust index as needed
+print(rwl.obj)  # Print the first RWL object, adjust index as needed
 #Check
-View(rwl.objs)
+View(rwl.obj)
 
+
+#### this only gives me the first 16 xml files..
+### attempt to fix this
 # List all TRIDAS XML files in your working directory
 tridas_files <- list.files(pattern = ".xml$", full.names = TRUE)
+# Check if this lists all XML files
 print(tridas_files)
 
-# Create an empty list for storage and a vector for failed files
+# Create an empty list for storage
 rwl_objects <- list()
-failed_files <- character()
 
-# Function to clean non-UTF-8 characters from a file
-clean_utf8 <- function(file) {
-  raw_content <- readBin(file, what = "raw", n = file.info(file)$size)
-  utf8_content <- iconv(rawToChar(raw_content), from = "latin1", to = "UTF-8", sub = "")
-  temp_file <- tempfile(fileext = ".xml")
-  writeLines(utf8_content, temp_file, useBytes = TRUE)
-  return(temp_file)
-}
-
-# Function to read a TRIDAS file with error handling for encoding issues
-read_tridas_with_encoding <- function(file) {
+# Loop through each file
+for (file in tridas_files) {
+  cat("Processing file:", file, "\n")  # Print current file being processed
+  
   tryCatch({
-    # Attempt to read the TRIDAS file as is
+    # Read TRIDAS file with specified encoding
     tridas_data <- read.tridas(file,
                                ids.from.titles = TRUE,
                                ids.from.identifiers = TRUE,
                                combine.series = TRUE,
                                trim.whitespace = TRUE,
                                warn.units = TRUE)
-    return(tridas_data)
-  }, error = function(e1) {
-    message("Error reading file:", file, "\n", conditionMessage(e1))
-    # Clean the file and try reading again
-    cleaned_file <- clean_utf8(file)
-    tridas_data <- read.tridas(cleaned_file,
-                               ids.from.titles = TRUE,
-                               ids.from.identifiers = TRUE,
-                               combine.series = TRUE,
-                               trim.whitespace = TRUE,
-                               warn.units = TRUE)
-    unlink(cleaned_file)  # Delete temporary file
-    return(tridas_data)
-  })
-}
-
-# Process each file
-for (file in tridas_files) {
-  cat("Processing file:", file, "\n")
-  
-  tridas_data <- tryCatch({
-    read_tridas_with_encoding(file)
-  }, error = function(e2) {
-    message("Failed to read file after cleaning:", file, "\n", conditionMessage(e2))
-    failed_files <- c(failed_files, file)
-    return(NULL)
-  })
-  
-  if (!is.null(tridas_data)) {
+    
     # Extract the measurements data frame
     measurements <- tridas_data$measurements
     
@@ -107,95 +76,63 @@ for (file in tridas_files) {
     # Store the RWL object in the list
     rwl_objects[[file]] <- rwl_object
     
+    # Print some information if needed
     cat("RWL object for", file, "created.\n")
-  }
+    
+  }, error = function(e) {
+    message("Error reading file:", file, "\n", conditionMessage(e))
+  })
 }
 
-# Summary
-cat("Total number of RWL objects created:", length(rwl_objects), "\n")
 
-# Example of accessing one of the RWL objects
-print(rwl_objects[[1]])
+# Print nams in rwl_objects
+print(names(rwl_objects))
 
-# View RWL objects in a readable format
-View(rwl_objects)
-
-
-
+#Works but missing some of the zuzh-- also 6 files do to ecoding errors
 # List all TRIDAS XML files in your working directory
-tridas_files <- list.files(pattern = ".xml$", full.names = TRUE)
-print(tridas_files)
-
-# Create an empty list for storage and a vector for failed files
-rwl_objects <- list()
-failed_files <- character()
+trifi <- list.files(pattern = ".xml$", full.names = TRUE)
+# Check if this lists all XML files - Should be 112 here at this point
+print(trifi)  
+# Create an empty list for storage
+rwl.obj <- list()
 
 # Function to clean non-UTF-8 characters from a file
 clean_utf8 <- function(file) {
-  raw_content <- readBin(file, what = "raw", n = file.info(file)$size)
+  raw_content <- readBin(file, "raw", file.info(file)$size)
   utf8_content <- iconv(rawToChar(raw_content), from = "latin1", to = "UTF-8", sub = "")
   temp_file <- tempfile(fileext = ".xml")
   writeLines(utf8_content, temp_file, useBytes = TRUE)
   return(temp_file)
 }
 
-# Function to read a TRIDAS file with error handling for encoding issues
-read_tridas_with_encoding <- function(file) {
-  tryCatch({
-    # Attempt to read the TRIDAS file as is
-    tridas_data <- read.tridas(file,
-                               ids.from.titles = TRUE,
-                               ids.from.identifiers = TRUE,
-                               combine.series = TRUE,
-                               trim.whitespace = TRUE,
-                               warn.units = TRUE)
-    return(tridas_data)
-  }, error = function(e1) {
-    message("Error reading file:", file, "\n", conditionMessage(e1))
-    # Clean the file and try reading again
+# Loop through each file
+for (file in trifi) {
+  ({
+    # Clean non-UTF-8 characters before reading
     cleaned_file <- clean_utf8(file)
-    tridas_data <- read.tridas(cleaned_file,
-                               ids.from.titles = TRUE,
-                               ids.from.identifiers = TRUE,
-                               combine.series = TRUE,
-                               trim.whitespace = TRUE,
-                               warn.units = TRUE)
-    unlink(cleaned_file)  # Delete temporary file
-    return(tridas_data)
+    
+    # Read TRIDAS files from the cleaned file
+    tridat <- tryCatch({
+      read.tridas(cleaned_file, ids.from.titles = TRUE, ids.from.identifiers = TRUE, 
+                  combine.series = TRUE, trim.whitespace = TRUE, warn.units = TRUE)
+    }, error = function(e) {
+      message("Error reading file:", file, "\n", conditionMessage(e))
+      NULL
+    })
+    
+    if (!is.null(tridat)) {
+      # Extract the measurements data frame
+      trimeas <- tridat$measurements
+      
+      # Convert measurements to RWL object
+      rwl.objs <- as.rwl(trimeas)
+      
+      # Store the RWL object in the list
+      rwl.obj[[file]] <- rwl.objs
+    }
   })
 }
 
-# Process each file
-for (file in tridas_files) {
-  cat("Processing file:", file, "\n")
-  
-  tridas_data <- tryCatch({
-    read_tridas_with_encoding(file)
-  }, error = function(e2) {
-    message("Failed to read file after cleaning:", file, "\n", conditionMessage(e2))
-    failed_files <- c(failed_files, file)
-    return(NULL)
-  })
-  
-  if (!is.null(tridas_data)) {
-    # Extract the measurements data frame
-    measurements <- tridas_data$measurements
-    
-    # Convert measurements to RWL object
-    rwl_object <- as.rwl(measurements)
-    
-    # Store the RWL object in the list
-    rwl_objects[[file]] <- rwl_object
-    
-    cat("RWL object for", file, "created.\n")
-  }
-}
-
-# Summary
-cat("Total number of RWL objects created:", length(rwl_objects), "\n")
-
-# Example of accessing one of the RWL objects
-print(rwl_objects[[1]])
-
-# View RWL objects in a readable format
-View(rwl_objects)
+print(rwl.obj)  # Print the first RWL object, adjust index as needed
+# Check
+View(rwl.obj)
