@@ -1,7 +1,7 @@
 library(dplR)
 #Start with one
-test <- "~/Google Drive/My Drive/eas"
-
+setwd("~/Google Drive/My Drive/2024_REU_crossdate/Quercus RW Tridas")
+## early bug fixing minimized
 Unk008<-read.tridas("UNKNWN-UNK-008-11-1-BR1.XML", ids.from.titles = TRUE,
 ids.from.identifiers = TRUE, combine.series = TRUE,trim.whitespace = TRUE,
 warn.units = TRUE)
@@ -44,7 +44,7 @@ rwl.obj[[file]] <- rwl.objs
 #print the names of the rwl.obj to see if there are 112
 print(names(rwl.obj)) 
 
-##attmepting to fix 
+##there are only 16 attmepting to fix 
 # List all TRIDAS XML files in your working directory
 tridas.files <- list.files(pattern = ".xml$", full.names = TRUE)
 # Check if this lists all XML files - Should be 112 here at this point
@@ -118,3 +118,123 @@ for (file in tridas.files) {
 print(names(rwl.objects))
 #extra check
 View(rwl.objects)
+####
+####
+process.tridas.file <- function(file) {
+  tridas.data <- read.tridas(file, ids.from.titles = TRUE, ids.from.identifiers = TRUE, 
+                             combine.series = TRUE, trim.whitespace = TRUE, warn.units = TRUE)
+  measurements <- tridas.data$measurements
+  rwl.object <- as.rwl(measurements)
+  return(rwl.object)
+}
+
+# Function to clean non-UTF-8 characters from a file
+clean.utf8 <- function(file) {
+  raw.content <- readBin(file, "raw", file.info(file)$size)
+  utf8.content <- iconv(rawToChar(raw.content), from = "latin1", to = "UTF-8", sub = "")
+  temp.file <- tempfile(fileext = ".xml")
+  writeLines(utf8.content, temp.file, useBytes = TRUE)
+  return(temp.file)
+}
+
+# List all TRIDAS XML files in your working directory
+tridas.files <- list.files(pattern = ".xml$", full.names = TRUE)
+print(tridas.files)  # Should list all XML files, expecting 112
+
+# Create an empty list for storing RWL objects
+rwl.objects <- list()
+
+# Loop through each file, clean it, and process it
+for (file in tridas.files) {
+  cleaned.file <- clean.utf8(file)
+  
+  tridas.data <- tryCatch({
+    process.tridas.file(cleaned.file)
+  }, error = function(e) {
+    message("Error reading file:", file, "\n", conditionMessage(e))
+    NULL
+  })
+  
+  if (!is.null(tridas.data)) {
+    rwl.objects[[file]] <- tridas.data
+    cat("RWL object for", file, "created.\n")
+  }
+}
+
+# Print names in rwl_objects to check if there are 112
+print(names(rwl.objects))
+
+# Extra check
+#View(rwl.objects)
+library(dplR)
+
+# Function to process TRIDAS file
+process.tridas.file <- function(file) {
+  tridas.data <- read.tridas(file, ids.from.titles = TRUE, ids.from.identifiers = TRUE, 
+                             combine.series = TRUE, trim.whitespace = TRUE, warn.units = TRUE)
+  measurements <- tridas.data$measurements
+  rwl.object <- as.rwl(measurements)
+  return(rwl.object)
+}
+
+# Function to clean non-UTF-8 characters from a file
+clean.utf8 <- function(file) {
+  raw.content <- readBin(file, "raw", file.info(file)$size)
+  utf8.content <- iconv(rawToChar(raw.content), from = "latin1", to = "UTF-8", sub = "")
+  temp.file <- tempfile(fileext = ".xml")
+  writeLines(utf8.content, temp.file, useBytes = TRUE)
+  return(temp.file)
+}
+
+# List all TRIDAS XML files in your working directory
+tridas.files <- list.files(pattern = ".xml$", full.names = TRUE)
+print(tridas.files)  # Should list all XML files, expecting 112
+
+# Create an empty list for storing RWL objects
+rwl.objects <- list()
+
+# Loop through each file, clean it, and process it
+for (file in tridas.files) {
+  cleaned.file <- clean.utf8(file)
+  
+  tridas.data <- tryCatch({
+    process.tridas.file(cleaned.file)
+  }, error = function(e) {
+    message("Error reading file:", file, "\n", conditionMessage(e))
+    NULL
+  })
+  
+  if (!is.null(tridas.data)) {
+    rwl.objects[[file]] <- tridas.data
+    cat("RWL object for", file, "created.\n")
+  }
+}
+
+# Find the union of all years
+all.years <- unique(unlist(lapply(rwl.objects, rownames)))
+all.years <- sort(as.numeric(all.years))
+
+# Initialize combined data frame with years
+combined.rwl <- data.frame(year = all.years)
+
+# Add measurements from each RWL object to the combined data frame
+for (file in names(rwl.objects)) {
+  measurements <- rwl.objects[[file]]
+  file.name <- basename(file)
+  
+  # Create a data frame for the current file with NA for missing years
+  df <- data.frame(year = as.numeric(rownames(measurements)), measurement = measurements[,1])
+  
+  # Merge with combined data frame
+  combined.rwl <- merge(combined.rwl, df, by = "year", all.x = TRUE)
+  
+  # Rename the last column to the file name
+  colnames(combined.rwl)[ncol(combined.rwl)] <- file.name
+}
+
+# Print combined RWL object
+print(combined.rwl)
+
+# Check combined RWL object
+View(combined.rwl)
+
