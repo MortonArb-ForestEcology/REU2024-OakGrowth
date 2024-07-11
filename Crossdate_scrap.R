@@ -166,7 +166,6 @@ print(names(rwl.objects))
 
 # Extra check
 #View(rwl.objects)
-library(dplR)
 
 # Function to process TRIDAS file
 process.tridas.file <- function(file) {
@@ -232,9 +231,12 @@ for (file in names(rwl.objects)) {
   colnames(combined.rwl)[ncol(combined.rwl)] <- file.name
 }
 
-# Print combined RWL object
-print(combined.rwl)
+# Print combined RWL object names to check
+print(colnames(combined.rwl))
 
-# Check combined RWL object
-View(combined.rwl)
+#making the year column now portray row names
+rownames(combined.rwl) <- combined.rwl$year
+combined.rwl <- combined.rwl[, -1]
+print(colnames(combined.rwl))
 
+      
