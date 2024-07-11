@@ -234,7 +234,7 @@ for (file in names(rwl.objects)) {
 # Print combined RWL object names to check
 print(colnames(combined.rwl))
 
-
+#setting my headers
 rownames(combined.rwl) <- combined.rwl$year
 combined.rwl <- combined.rwl[, -1]
 print(colnames(combined.rwl))
@@ -242,9 +242,8 @@ View(combined.rwl)
 #need to removed column 73 now due to data entry error
 comb.rwl <- combined.rwl[, -73]
 
-View(comb.rwl)
+print(colnames(comb.rwl))
 ### It looks like this fixed that error, and now I need to figure out what the first row to contain a value other that NA is
-
 # Find the index of the first row where any column does not equal "NA"
 dcomb.rwl <- which.max(apply(comb.rwl != "NA", 1, any))
 
@@ -253,16 +252,30 @@ print(comb.rwl[dcomb.rwl, ])
 
 #remove all the rows previous to this
 # Remove all rows above dcomb.rwl
-comb.rwl <- comb.rwl[dcomb.rwl:nrow(comb.rwl), ]
+comb1.rwl <- comb.rwl[dcomb.rwl:nrow(comb.rwl), ]
 
-# Print the first few rows of combined.rwl to verify
-head(comb.rwl)
+# Print the first few rows of comb.rwl
+head(comb1.rwl)
+View(comb1.rwl)
 
-rows_with_zero <- apply(comb.rwl == 0, 1, any)
 
-# Remove rows with 0
-comb.rwl <- comb.rwl[!rows_with_zero, ]
 
-# Print the updated number of rows
-print("Number of rows after removing rows with 0:", nrow(combined.rwl), "\n")
-list(cat)
+##row names broke below, setting a restore because I'm bad at this
+rnames <- rownames(comb1.rwl)
+
+# Iterate through each row and column combination
+
+for (i in 1:nrow(comb1.rwl)) {
+  for (j in 1:ncol(comb1.rwl)) {
+    if (!is.na(comb1.rwl[i, j]) && comb1.rwl[i, j] == "0") {
+      comb1.rwl[i, j] <- NA  # Change "0" to NA
+    }
+  }
+}
+
+# Restore original row names
+rownames(comb1.rwl) <- rnames
+
+View(comb1.rwl)
+#write.csv(comb1.rwl, file= '~/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/comb1.csv')
+##finally works I think..
