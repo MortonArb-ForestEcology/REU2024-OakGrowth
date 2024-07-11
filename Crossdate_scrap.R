@@ -1,5 +1,7 @@
 library(dplR)
 #Start with one
+test <- "~/Google Drive/My Drive/eas"
+
 Unk008<-read.tridas("UNKNWN-UNK-008-11-1-BR1.XML", ids.from.titles = TRUE,
 ids.from.identifiers = TRUE, combine.series = TRUE,trim.whitespace = TRUE,
 warn.units = TRUE)
