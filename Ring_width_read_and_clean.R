@@ -138,9 +138,25 @@ for (i in 1:nrow(comb1.rwl)) {
   }
 }
 rownames(comb1.rwl) <- rnames
-#check
+#check 
 View(comb1.rwl)
 
+#checking the class of comb1.rwl to ensure it's a rwl file
+class(comb1.rwl)
+#assiging it the rwl classification as well
+class(comb1.rwl) <- c("rwl", class(comb1.rwl))
+class(comb1.rwl)
 
+coredat <- comb1.rwl
+
+coredat <- detrend(coredat, method = "Mean")  # Detrending
+crs <- chron(coredat)  # Creating a chronology
+
+# Print summary of the chronology
+summary(crs)
+
+# Plot the chronology
+#plot(coredat, plot.type="spag")
+plot(crs, main = "Chronology")
 # If additinal check are needed you may write this as a .csv file
 #write.csv(comb1.rwl, file= '~/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/comb1.csv')
