@@ -21,18 +21,25 @@
 
 library(dplR)
 
-# Set working directory
-# Until pathing errors are fixed on drive This will need to be the location of these data on the users local drive
-setwd("~/Google Drive/My Drive/2024_REU_crossdate/Quercus RW Tridas")
+# Set working directory  # CR:  we ALWAYS want the working directory to be where our repository is; we want to set up a path to where to read/write files
 
-# Function to process TRIDAS file
-process.tridas.file <- function(file) {
-  tridas.data <- read.tridas(file, ids.from.titles = TRUE, ids.from.identifiers = TRUE, 
-                             combine.series = TRUE, trim.whitespace = TRUE, warn.units = TRUE)
-  measurements <- tridas.data$measurements
-  rwl.object <- as.rwl(measurements)
-  return(rwl.object)
-}
+# Until pathing errors are fixed on drive This will need to be the location of these data on the users local drive
+# setwd("~/Google Drive/My Drive/2024_REU_crossdate/Quercus RW Tridas")
+# setwd("~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - First Pull/Quercus RW Tridas/")
+
+path.dat <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - First Pull/Quercus RW Tridas/"
+path.out <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/organized"
+
+if(!dir.exists(path.out)) dir.create(path.out, recursive = T)
+
+# Function to process TRIDAS file # CR: This was good, but not using the funciton to make it easier to store metadata
+# process.tridas.file <- function(file) {
+#   tridas.data <- read.tridas(file, ids.from.titles = TRUE, ids.from.identifiers = TRUE, 
+#                              combine.series = TRUE, trim.whitespace = TRUE, warn.units = TRUE)
+#   measurements <- tridas.data$measurements
+#   rwl.object <- as.rwl(measurements)
+#   return(rwl.object)
+# }
 
 # There is an encoding error in several of the files, this 
 # Funtion cleans non-UTF-8 characters from a files
@@ -46,39 +53,70 @@ clean.utf8 <- function(file) {
 
 #This section lists the XML files to check an ensure the data is consistent.
 #It then cleans a process these files and stores them as .RWL objects
-tridas.files <- list.files(pattern = ".xml$", full.names = TRUE)
+
+# tridas.files <- list.files(pattern = ".xml$", full.names = TRUE)
+tridas.files <- dir(path.dat, ".xml") # This ends up being just a hair cleaner in terms of coding
 print(tridas.files)  # Should list all XML files, expecting 112
 
 # Create an empty list for storing RWL objects
 rwl.objects <- list()
 
+# Adding a data frame to store key metadata 
+series.metadata <- data.frame(file=tridas.files, site=NA, taxon=NA, treeID=NA, core=NA, radius=NA, measurement=NA, year.first=NA, year.last=NA, first0Flag=NA, last0Flag=NA)
+# first/last 0 Flag being if there are leading/trailing 0s we need to clean up and redate
+
+# names(tridas.data)
+
 # Loop through each file, clean it, and process it
-for (file in tridas.files) {
-  cleaned.file <- clean.utf8(file)
- #cecking for errors with read in text visible in the console 
-  tridas.data <- tryCatch({
-    process.tridas.file(cleaned.file)
-  }, error = function(e) {
-    message("Error reading file:", file, "\n", conditionMessage(e))
-    NULL
-  })
+for (FILE in tridas.files) {
+
+  rowFile <- which(series.metadata$file==FILE)
   
-  if (!is.null(tridas.data)) {
-    rwl.objects[[file]] <- tridas.data
-    cat("RWL object for", file, "created.\n")
-  }
+  cleaned.file <- clean.utf8(file=FILE)
+ # cecking for errors with read in text visible in the console
+  # tridas.data <- tryCatch({
+  #    process.tridas.file(file=cleaned.file)
+  #  }, error = function(e) {
+  #    message("Error reading file:", FILE, "\n", conditionMessage(e))
+  #    NULL
+  #  })
+  
+  tridas.data <- read.tridas(cleaned.file, ids.from.titles = TRUE, ids.from.identifiers = TRUE,
+                             combine.series = TRUE, trim.whitespace = TRUE, warn.units = TRUE)
+  
+  # series.metadata[rowFile,]
+  
+  measurements <- tridas.data$measurements
+  rwl.objects[[FILE]] <- as.rwl(measurements)
+  
+  series.metadata[rowFile, "site"] <- tridas.data$site.title$site.title
+  series.metadata[rowFile, "taxon"] <- tridas.data$taxon$normal
+  series.metadata[rowFile, c("treeID", "core", "radius", "measurement")] <- tridas.data$titles
+  series.metadata[rowFile, c("year.first", "year.last")] <- as.numeric(range(row.names(measurements)))
+  
+  # if (!is.null(tridas.data)) {
+  #   rwl.objects[[file]] <- tridas.data
+  #   cat("RWL object for", file, "created.\n")
+  # }
 }
 #####
+
+#####
+# Identifying problem cores up front
+#####
+rowBad <- which(series.metadata$year.last<=1900 | series.metadata$year.last>=lubridate::year(Sys.Date()))
+series.metadata[rowBad,]
+filesBAD <- series.metadata$file[rowBad]
+
+rwlList <- rwl.objects[!names(rwl.objects) %in% filesBAD] # Just keeping the good ones
+#####
+
 
 #####
 #This next section combines the individual RWL objest into a single data frame and aligns the 
 #measurements by year
 #####
-
-# Print names in rwl.objects to check if there are 112
-print(names(rwl.objects))
-
-all.years <- unique(unlist(lapply(rwl.objects, rownames)))
+all.years <- unique(unlist(lapply(rwlList, rownames)))
 all.years <- sort(as.numeric(all.years))
 
 # Creates a data frame which will store the measurements
@@ -86,8 +124,8 @@ all.years <- sort(as.numeric(all.years))
 combined.rwl <- data.frame(year = all.years)
 
 # Add measurements from each RWL object to the combined data frame
-for (file in names(rwl.objects)) {
-  measurements <- rwl.objects[[file]]
+for (file in names(rwlList)) {
+  measurements <- rwlList[[file]]
   file.name <- basename(file)
   
   # Create a data frame for the current file, Missing years will contain an NA
@@ -106,74 +144,54 @@ print(colnames(combined.rwl))
 
 # Set row names the the "year" and remove the year column
 rownames(combined.rwl) <- combined.rwl$year
-combined.rwl <- combined.rwl[, -1]
+combined.rwl <- combined.rwl[, -which(colnames(combined.rwl)=="year")]
 #check
 print(colnames(combined.rwl))
 #View(combined.rwl)
-#############################################
-# Remove column 73 due to data entry error
-comb.rwl <- combined.rwl[, -73]
-print(colnames(comb.rwl))
-#############################################
+summary(combined.rwl)
 
-# Find the first row to contain a value other than NA
-dcomb.rwl <- which.max(apply(comb.rwl != "NA", 1, any))
-#check to see the first rown in all columns to contain a non- NA value
-head(comb.rwl[dcomb.rwl, ])
-
-# Remove all rows previous to this
-comb1.rwl <- comb.rwl[dcomb.rwl:nrow(comb.rwl), ]
-#check to see if this matches the row in Head 
-head(comb1.rwl)
-#View(comb1.rwl)
-
-#This next sextion will replace true "0" values with NA
-#For some reason running this removes the years for my row names so preserving them first
-rnames <- rownames(comb1.rwl)
-for (i in 1:nrow(comb1.rwl)) {
-  for (j in 1:ncol(comb1.rwl)) {
-    if (!is.na(comb1.rwl[i, j]) && comb1.rwl[i, j] == "0") {
-      comb1.rwl[i, j] <- NA
-    }
+# Get rid of leading and trailing 0s in our series
+# What Brendon had was a good start, but this will be a bit more robust
+for(i in 1:ncol(combined.rwl)){
+  fNow <- names(combined.rwl)[i]
+  rowfirstDat <- min(which(!is.na(combined.rwl[,i])))
+  rowlastDat <- max(which(!is.na(combined.rwl[,i])))
+  
+  rowfirstMeas <- min(which(combined.rwl[,i]>0))
+  rowlastMeas <- max(which(combined.rwl[,i]>0))
+  
+  # Deal with leading 0s
+  if(rowfirstDat==rowfirstMeas){
+    series.metadata$first0Flag[series.metadata$file==fNow] <- F
+  } else {
+    print(paste0(fNow, ": removing leading 0s"))
+    series.metadata$first0Flag[series.metadata$file==fNow] <- T
+    combined.rwl[1:rowfirstMeas,i] <- NA
   }
+  
+  # Deal with trailing 0s 
+  if(rowlastDat==rowlastMeas){ 
+    series.metadata$last0Flag[series.metadata$file==fNow] <- F
+  } else {
+    print(paste0(fNow, ": removing trailing 0s"))
+    series.metadata$last0Flag[series.metadata$file==fNow] <- T
+    combined.rwl[rowlastMeas:nrow(comb.rwl),i] <- NA
+  }
+  
 }
-rownames(comb1.rwl) <- rnames
-#check 
-#View(comb1.rwl)
 
-#checking the class of comb1.rwl to ensure it's a rwl file
-class(comb1.rwl)
-#assigning it the rwl classification as well
-class(comb1.rwl) <- c("rwl", class(comb1.rwl))
-#check
-class(comb1.rwl)
-# very basic statistics
-rwl.report(comb1.rwl)
+# print out cores that need leading or trailing 0s fixed (to be redated)
+series.metadata[!is.na(series.metadata$first0Flag) & (series.metadata$first0Flag | series.metadata$last0Flag),]
 
-#saving this as a txt on google drive
-#set the path
-report <- "~/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/rwl_report.txt"
-# Open a connection too google drive
-sink(report)
-# Generate the report
-rwl.report(comb1.rwl)
-# Close the connection to google drive
-sink()
+cores.check <- series.metadata[(!is.na(series.metadata$first0Flag) & (series.metadata$first0Flag | series.metadata$last0Flag)) | 
+                                 (series.metadata$year.last<=1900 | series.metadata$year.last>=lubridate::year(Sys.Date())) ,]
 
-coredat <- detrend(comb1.rwl, method = "Mean")  # Detrending
-crs <- chron(coredat)  # Creating a chronology
-# Print summary of the chronology
-summary(crs)
-# Plot the chronology
-plot(crs, main = "Chronology")
-plot(crs, main = "Chronology", add.spline = TRUE, nyrs=5)
-summary(crs)
+write.csv(cores.check, file.path(path.out, "Series-with-Errors.csv"), row.names=F)
 
-# Extract the chronology (std) component
-chron.std <- crs[, "std"]
-# Plot the chronology without sample depth
-plot(rownames(crs), chron.std, type = "l", main = "Chronology", xlab = "Year", ylab = "Index", add.spline=TRUE, nyrs=5)
 
-# Add a spline to the chronology plot
-spline_fit <- smooth.spline(as.numeric(rownames(crs)), chron_std, spar = 0.5)
-lines(spline_fit, col = "red")
+# Now also write out the metadata and compiled data
+write.csv(series.metadata, file.path(path.out, "Series-Metadata_all.csv"), row.names=F)
+write.csv(combined.rwl, file.path(path.out, "Series-Measurements_all.csv"), row.names=F)
+
+
+
