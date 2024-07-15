@@ -72,7 +72,7 @@ for (FILE in tridas.files) {
 
   rowFile <- which(series.metadata$file==FILE)
   
-  cleaned.file <- clean.utf8(file=FILE)
+  cleaned.file <- clean.utf8(file=file.path(path.dat, FILE))
  # cecking for errors with read in text visible in the console
   # tridas.data <- tryCatch({
   #    process.tridas.file(file=cleaned.file)
@@ -85,14 +85,15 @@ for (FILE in tridas.files) {
                              combine.series = TRUE, trim.whitespace = TRUE, warn.units = TRUE)
   
   # series.metadata[rowFile,]
-  
-  measurements <- tridas.data$measurements
-  rwl.objects[[FILE]] <- as.rwl(measurements)
+  # tridas.data$unit
+  if(max(tridas.data$measurements)<1 & tridas.data$unit=="millimetres") tridas.data$measurements <- tridas.data$measurements*100 # Things are being weird, but for now lets just hack this fix in 
+  # measurements <- tridas.data$measurements
+  rwl.objects[[FILE]] <- as.rwl(tridas.data$measurements)
   
   series.metadata[rowFile, "site"] <- tridas.data$site.title$site.title
   series.metadata[rowFile, "taxon"] <- tridas.data$taxon$normal
   series.metadata[rowFile, c("treeID", "core", "radius", "measurement")] <- tridas.data$titles
-  series.metadata[rowFile, c("year.first", "year.last")] <- as.numeric(range(row.names(measurements)))
+  series.metadata[rowFile, c("year.first", "year.last")] <- as.numeric(range(row.names(tridas.data$measurements)))
   
   # if (!is.null(tridas.data)) {
   #   rwl.objects[[file]] <- tridas.data
@@ -175,10 +176,14 @@ for(i in 1:ncol(combined.rwl)){
   } else {
     print(paste0(fNow, ": removing trailing 0s"))
     series.metadata$last0Flag[series.metadata$file==fNow] <- T
-    combined.rwl[rowlastMeas:nrow(comb.rwl),i] <- NA
+    combined.rwl[rowlastMeas:nrow(combined.rwl),i] <- NA
   }
   
 }
+
+# Trim out rows that are all missing
+rows.dat <- apply(combined.rwl, 1, FUN=function(x){!all(is.na(x))})
+combined.rwl <- combined.rwl[rows.dat,]
 
 # print out cores that need leading or trailing 0s fixed (to be redated)
 series.metadata[!is.na(series.metadata$first0Flag) & (series.metadata$first0Flag | series.metadata$last0Flag),]
@@ -191,7 +196,7 @@ write.csv(cores.check, file.path(path.out, "Series-with-Errors.csv"), row.names=
 
 # Now also write out the metadata and compiled data
 write.csv(series.metadata, file.path(path.out, "Series-Metadata_all.csv"), row.names=F)
-write.csv(combined.rwl, file.path(path.out, "Series-Measurements_all.csv"), row.names=F)
+write.csv(combined.rwl, file.path(path.out, "Series-Measurements_all.csv"), row.names=T)
 
 
 
