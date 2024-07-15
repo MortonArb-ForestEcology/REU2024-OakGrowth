@@ -108,6 +108,9 @@ segWorst <- corr.series.seg(combined.rwl[,serLong], series=sum.rwl$series[sum.rw
 
 # datyrs <- time(combined.rwl)
 ccfWorst <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[sum.rwl$rho==min(sum.rwl$rho)], seg.length=20, bin.floor=0)
+# Checking the metadata of rhat sample
+sum.rwl[sum.rwl$rho==min(sum.rwl$rho),] # Our worst correlator
 
 
 ccfWorst2 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[2], seg.length=50, bin.floor=0)
+sum.rwl[sum.rwl$series == series.BAD[2],]
