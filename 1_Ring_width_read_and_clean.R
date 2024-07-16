@@ -25,9 +25,9 @@ library(dplR)
 
 # Until pathing errors are fixed on drive This will need to be the location of these data on the users local drive
 # setwd("~/Google Drive/My Drive/2024_REU_crossdate/Quercus RW Tridas")
-# setwd("~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - First Pull/Quercus RW Tridas/")
+# setwd("~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/")
 
-path.dat <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - First Pull/Quercus RW Tridas/"
+path.dat <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/"
 path.out <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/organized"
 
 if(!dir.exists(path.out)) dir.create(path.out, recursive = T)
@@ -56,7 +56,7 @@ clean.utf8 <- function(file) {
 
 # tridas.files <- list.files(pattern = ".xml$", full.names = TRUE)
 tridas.files <- dir(path.dat, ".xml") # This ends up being just a hair cleaner in terms of coding
-print(tridas.files)  # Should list all XML files, expecting 112
+print(tridas.files)  # Should list all XML files, expecting 112 from first pull, 126 from second pull
 
 # Create an empty list for storing RWL objects
 rwl.objects <- list()
