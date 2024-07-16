@@ -88,7 +88,7 @@ series.good <- row.names(corrTable)[corrTable$rho>median(corrTable$rho)]
 series.BAD <- row.names(corrTable)[corrTable$rho<0]
 series.LO <- row.names(corrTable)[corrTable$rho<0.1]
 
-corrDefault2 <- corr.rwl.seg(combined.rwl, master=combined.rwl[,series.good])
+corrDefault2 <- corr.rwl.seg(combined.rwl[,serLong], master=combined.rwl[,series.good])
 corrTable2 <- data.frame(corrDefault2$overall) # Gives us the table with correlations (Spearman's rho)
 corrTable2$series <- row.names(corrTable2)
 summary(corrTable2)
@@ -97,20 +97,29 @@ summary(corrTable2)
 sum.rwl <- merge(sum.rwl, corrTable2, all.x=T)
 summary(sum.rwl)
 
-sum.rwl[sum.rwl$rho==max(sum.rwl$rho),] # Our best correlater
-sum.rwl[sum.rwl$rho==min(sum.rwl$rho),] # Our worst correlator
-sum.rwl[sum.rwl$rho<0.1,]
+sum.rwl[!is.na(sum.rwl$rho) & sum.rwl$rho==max(sum.rwl$rho, na.rm=T),] # Our best correlater
+sum.rwl[!is.na(sum.rwl$rho) & sum.rwl$rho==min(sum.rwl$rho, na.rm=T),] # Our worst correlator
+sum.rwl[sum.rwl$series %in% series.BAD, ] # Printing out the things that have negative corrs
+sum.rwl[sum.rwl$series %in% series.LO, ] # Printing out the things that have low corrs
+
+summary(sum.rwl[sum.rwl$series %in% series.good,]) # Comparing with the stats for things that worked well
 
 
 # Lets start with the series that have negative correlation
-segBest <- corr.series.seg(combined.rwl[,serLong], series=sum.rwl$series[sum.rwl$rho==max(sum.rwl$rho)], seg.lenth=20)
-segWorst <- corr.series.seg(combined.rwl[,serLong], series=sum.rwl$series[sum.rwl$rho==min(sum.rwl$rho)], seg.lenth=20, bin.floor = 0)
+segBest <- corr.series.seg(combined.rwl[,serLong], series=sum.rwl$series[!is.na(sum.rwl$rho) & sum.rwl$rho==max(sum.rwl$rho, na.rm=T)], seg.lenth=20)
+segWorst <- corr.series.seg(combined.rwl[,serLong], series=sum.rwl$series[!is.na(sum.rwl$rho) & sum.rwl$rho==min(sum.rwl$rho, na.rm=T)], seg.lenth=20, bin.floor = 0)
 
-# datyrs <- time(combined.rwl)
-ccfWorst <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[sum.rwl$rho==min(sum.rwl$rho)], seg.length=20, bin.floor=0)
+
+# Now breaking things into the individual ones
+sum.rwl[sum.rwl$series==series.BAD[1],] # Our worst correlator
+ccfWorst1 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[1], seg.length=20, bin.floor=0)
 # Checking the metadata of rhat sample
-sum.rwl[sum.rwl$rho==min(sum.rwl$rho),] # Our worst correlator
+# ccfWorst1 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
 
 
-ccfWorst2 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[2], seg.length=50, bin.floor=0)
+# Note: This isn't necessarily pulling the 2nd worst -- just the 2nd in the seiresworst 
 sum.rwl[sum.rwl$series == series.BAD[2],]
+ccfWorst2 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[2], seg.length=50, bin.floor=0)
+# ccfWorst2 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
+
+# # MIRANDA -- do this for the 3rd bad one too!
