@@ -113,13 +113,18 @@ segWorst <- corr.series.seg(combined.rwl[,serLong], series=sum.rwl$series[!is.na
 # Now breaking things into the individual ones
 sum.rwl[sum.rwl$series==series.BAD[1],] # Our worst correlator
 ccfWorst1 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[1], seg.length=20, bin.floor=0)
+# UNK156
 # Checking the metadata of rhat sample
-# ccfWorst1 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
-
+ccfWorst1 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
 
 # Note: This isn't necessarily pulling the 2nd worst -- just the 2nd in the seiresworst 
 sum.rwl[sum.rwl$series == series.BAD[2],]
 ccfWorst2 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[2], seg.length=50, bin.floor=0)
-# ccfWorst2 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
+# UNK 157
+ccfWorst2 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
 
-# # MIRANDA -- do this for the 3rd bad one too!
+sum.rwl[sum.rwl$series == series.BAD[3],]
+ccfWorst3 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[3], seg.length=50, bin.floor=0)
+# UNK 217
+ccfWorst3 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
+
