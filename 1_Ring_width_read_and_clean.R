@@ -100,6 +100,10 @@ for (FILE in tridas.files) {
   #   cat("RWL object for", file, "created.\n")
   # }
 }
+dim(series.metadata)
+length(rwl.objects)
+
+summary(series.metadata)
 #####
 
 #####
@@ -140,16 +144,19 @@ for (file in names(rwlList)) {
 }
 
 # Print combined RWL object names to check
-print(colnames(combined.rwl))
-
+print(colnames(combined.rwl)[1:25])
+print(tail(colnames(combined.rwl)))
+dim(combined.rwl)
 
 # Set row names the the "year" and remove the year column
 rownames(combined.rwl) <- combined.rwl$year
 combined.rwl <- combined.rwl[, -which(colnames(combined.rwl)=="year")]
 #check
-print(colnames(combined.rwl))
+# print(colnames(combined.rwl))
+head(colnames(combined.rwl))
+dim(combined.rwl)
 #View(combined.rwl)
-summary(combined.rwl)
+summary(combined.rwl[,1:10])
 
 # Get rid of leading and trailing 0s in our series
 # What Brendon had was a good start, but this will be a bit more robust
