@@ -146,8 +146,50 @@ sum.rwl[sum.rwl$series == series.BAD[3],]
 ccfWorst3 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[3], seg.length=50, bin.floor=0)
 # UNK 217
 ccfWorst3 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
-<<<<<<< HEAD
-=======
+
 apply(ccfWorst3$ccf, 1, mean)
 
->>>>>>> 14f737e60c1c9376df988877844e248efd3616d4
+#Checking individual samples
+sum.rwl[1,] # lowest correlation value
+# UNK157, rho=-0.16559
+ccfWorst1 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[1], seg.length=20, bin.floor=0)
+
+sum.rwl[2,] # low correlation value
+# UNK156, rho=-0.1384
+ccfWorst2 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[2], seg.length=20, bin.floor=0)
+
+sum.rwl[3,] # low correlation value
+# UNK217, rho=-0.054382
+ccfWorst3 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[3], seg.length=20, bin.floor=0)
+
+sum.rwl[4,] # low correlation value
+# UNK095 MC, rho=0.02394775
+ccfWorst4 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[4], seg.length=20, bin.floor=0)
+
+sum.rwl[5,] # low correlation value
+# UNK095 BR, rho=0.06245224
+ccfWorst5 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[5], seg.length=20, bin.floor=0)
+
+sum.rwl[6,] # low correlation value
+# UNK051, rho=0.09607976
+ccfWorst6 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[6], seg.length=20, bin.floor=0)
+
+sum.rwl[7,] # low correlation value
+# DafGla-001, rho=0.2119436
+ccfWorst7 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[7], seg.length=20, bin.floor=0)
+
+sum.rwl[8,] # low correlation value
+# UNK-062, rho=0.2435027
+ccfWorst8 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[8], seg.length=20, bin.floor=0)
+
+sum.rwl[9,] # low correlation value
+# FFLYPD141, rho=0.2715899
+ccfWorst9 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[9], seg.length=20, bin.floor=0)
+
+sum.rwl[10,] # low correlation value
+# QUERCS463, rho=0.3064106
+ccfWorst10 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[10], seg.length=20, bin.floor=0)
+
+sum.rwl[11,] # low correlation value
+# UNK230, rho=0.3093081
+ccfWorst11 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[11], seg.length=20, bin.floor=0)
