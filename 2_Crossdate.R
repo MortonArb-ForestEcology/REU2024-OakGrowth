@@ -131,14 +131,23 @@ ccfWorst1 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[1], se
 # UNK156
 # Checking the metadata of rhat sample
 ccfWorst1 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
+summary(ccfWorst1$ccf)
+# looking at the average shift across all segments --> this code takes the mean of all columns
+apply(ccfWorst1$ccf, 1, mean)
 
 # Note: This isn't necessarily pulling the 2nd worst -- just the 2nd in the seiresworst 
 sum.rwl[sum.rwl$series == series.BAD[2],]
 ccfWorst2 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[2], seg.length=50, bin.floor=0)
 # UNK 157
 ccfWorst2 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
+apply(ccfWorst2$ccf, 1, mean)
 
 sum.rwl[sum.rwl$series == series.BAD[3],]
 ccfWorst3 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[3], seg.length=50, bin.floor=0)
 # UNK 217
 ccfWorst3 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
+<<<<<<< HEAD
+=======
+apply(ccfWorst3$ccf, 1, mean)
+
+>>>>>>> 14f737e60c1c9376df988877844e248efd3616d4
