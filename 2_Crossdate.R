@@ -93,9 +93,17 @@ corrTable2 <- data.frame(corrDefault2$overall) # Gives us the table with correla
 corrTable2$series <- row.names(corrTable2)
 summary(corrTable2)
 
+hist(corrTable2$rho) #showing the distribution of correlation values among samples
+
 # Update our rwl.sum with the correlation stats
 sum.rwl <- merge(sum.rwl, corrTable2, all.x=T)
 summary(sum.rwl)
+
+# Sorting our summary table based on rho so that the lowest/worst correlators are top (and our priority)
+head(sum.rwl[!is.na(sum.rwl$rho),])
+sum.rwl <- sum.rwl[order(sum.rwl$rho, decreasing=F),]
+head(sum.rwl[!is.na(sum.rwl$rho),])
+
 
 sum.rwl[!is.na(sum.rwl$rho) & sum.rwl$rho==max(sum.rwl$rho, na.rm=T),] # Our best correlater
 sum.rwl[!is.na(sum.rwl$rho) & sum.rwl$rho==min(sum.rwl$rho, na.rm=T),] # Our worst correlator
@@ -109,10 +117,17 @@ summary(sum.rwl[sum.rwl$series %in% series.good,]) # Comparing with the stats fo
 segBest <- corr.series.seg(combined.rwl[,serLong], series=sum.rwl$series[!is.na(sum.rwl$rho) & sum.rwl$rho==max(sum.rwl$rho, na.rm=T)], seg.lenth=20)
 segWorst <- corr.series.seg(combined.rwl[,serLong], series=sum.rwl$series[!is.na(sum.rwl$rho) & sum.rwl$rho==min(sum.rwl$rho, na.rm=T)], seg.lenth=20, bin.floor = 0)
 
+# Checking against somethign that *should* be good
+sum.rwl[87,] # a random number that *should* be okay
+ccfWorstOK <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[87], seg.length=20, bin.floor=0)
+# UNK050 Rho=0.7264034
+
+# Checking the metadata of rhat sample
+ccfWorst1 # Printing this gives you the actual quantitative effects on the rho value; un-comment 
 
 # Now breaking things into the individual ones
-sum.rwl[sum.rwl$series==series.BAD[1],] # Our worst correlator
-ccfWorst1 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[1], seg.length=20, bin.floor=0)
+sum.rwl[1,] # Our worst correlator
+ccfWorst1 <- ccf.series.rwl(combined.rwl[,serLong], series=sum.rwl$series[1], seg.length=20, bin.floor=0)
 # UNK156
 # Checking the metadata of rhat sample
 ccfWorst1 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
@@ -127,4 +142,3 @@ sum.rwl[sum.rwl$series == series.BAD[3],]
 ccfWorst3 <- ccf.series.rwl(combined.rwl[,serLong], series=series.BAD[3], seg.length=50, bin.floor=0)
 # UNK 217
 ccfWorst3 # Printing this gives you the actual quantitative effects on the rho value; un-comment this out to actually print it
-
