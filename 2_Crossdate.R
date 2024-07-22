@@ -2,8 +2,8 @@
 
 library(dplR)
 
-path.raw <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/organized"
-path.xdate <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/crossdating"
+path.raw <- "~/Desktop/Data/Raw Ring Widths/organized"
+path.xdate <- "~/Desktop/Data/Raw Ring Widths/organized/crossdating"
 
 if(!dir.exists(path.xdate)) dir.create(path.xdate, recursive = T)
 
