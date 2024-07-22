@@ -2,8 +2,10 @@
 
 library(dplR)
 
-path.raw <- "~/Desktop/Data/Raw Ring Widths/organized"
-path.xdate <- "~/Desktop/Data/Raw Ring Widths/organized/crossdating"
+# path.raw <- "~/Desktop/Data/Raw Ring Widths/organized"
+# path.xdate <- "~/Desktop/Data/Raw Ring Widths/organized/crossdating"
+path.raw <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/organized"
+path.xdate <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/crossdating"
 
 if(!dir.exists(path.xdate)) dir.create(path.xdate, recursive = T)
 
@@ -98,6 +100,8 @@ hist(corrTable2$rho) #showing the distribution of correlation values among sampl
 # Update our rwl.sum with the correlation stats
 sum.rwl <- merge(sum.rwl, corrTable2, all.x=T)
 summary(sum.rwl)
+head(sum.rwl)
+write.csv(sum.rwl, file.path(path.raw, "Series-Metadata-XdateStats_all.csv"), row.names=F)
 
 # Sorting our summary table based on rho so that the lowest/worst correlators are top (and our priority)
 head(sum.rwl[!is.na(sum.rwl$rho),])
