@@ -26,9 +26,13 @@ library(dplR)
 # Until pathing errors are fixed on drive This will need to be the location of these data on the users local drive
 # setwd("~/Google Drive/My Drive/2024_REU_crossdate/Quercus RW Tridas")
 # setwd("~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/")
+#This should be your path but is not working on Mirada's file stream so commented out
+#path.dat <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/"
+#path.out <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/organized"
 
-path.dat <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/"
-path.out <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/organized"
+#path to make this work on Mirada's computer. Path is Local ONLY TO Miranada's Computer
+path.dat <- "~/Desktop/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/"
+path.out <- "~/Desktop/Data/Raw Ring Widths/organized"
 
 if(!dir.exists(path.out)) dir.create(path.out, recursive = T)
 
