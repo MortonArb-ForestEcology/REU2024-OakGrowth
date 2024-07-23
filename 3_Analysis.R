@@ -38,7 +38,7 @@ if(!dir.exists(path.out)) dir.create(path.out)
 dir(path.dat) # Seeing what info we have available to work with
 
 # Reading in all the stats about what tree things are form etc
-series.metadata <- read.csv(file.path(path.raw, "Series-Metadata_all.csv"))
+series.metadata <- read.csv(file.path(path.dat, "Series-Metadata_all.csv"))
 dim(series.metadata)# Checking dimensions to get a feel for how complex a set we're working with
 summary(series.metadata) # Checking to get a feel for the data
 head(series.metadata) # lots of stuff is characters, so spitting out the first few rows to check on what we have
