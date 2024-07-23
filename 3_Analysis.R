@@ -94,10 +94,10 @@ for(i in 1:nrow(dfTree)){
   # (this would be VERY weird but we can deal with it later)
   if(length(rowMetaDat)==0) next 
   
-  dfTree[i,c("site", "taxon", "year.first", "year.last")] <- metaNOW[,c("site", "taxon", "year.first", "year.last")]
+  dfTree[i,c("site", "taxon")] <- series.metadata[rowMetaDat[1],c("site", "taxon")]
   
   # Seeing if there is pith on the sample
-  rowMaster <- which(lcwaMaster$SpecimenID==dfTree$treeID[i])
+  rowMaster <- which(toupper(lcwaMaster$SpecimenID)==toupper(dfTree$treeID[i]))
   # lcwaMaster[rowMaster,]
   # If we have more than 1 sample for this tree, figure out what sample we're working with
   if(length(rowMaster)>1) {
@@ -146,12 +146,15 @@ for(i in 1:nrow(dfTree)){
 
   dfTree[i,c("nyr.SeriesMax", "file.use", "xDate.rho", "xDate.pval")] <- xDateNOW[,c("year", "series", "rho", "p.val")]
   
+  dfTree[i,c("year.first", "year.last")] <- metaNOW[,c("year.first", "year.last")]
+  
   # dfTree[i,]
   
 
 }
 
 summary(dfTree)
+dfTree[is.na(dfTree$pith.present),]
 # unique(dfTree$pith.present)
 
 hist(dfTree$year.first) # All first years

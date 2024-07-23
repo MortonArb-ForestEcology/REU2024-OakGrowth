@@ -132,7 +132,7 @@ dev.off()
 
 
 ggplot(data=dfTree[,]) +
-  geom_point(aes(x=year.first, y=BAI.slope10, color=sp.epith)) +
+  geom_point(aes(x=year.first, y=BAI.slope20, color=sp.epith)) +
   labs(fill="Species", x = "First Year", y="BAI slope (mm2)") +
   theme_bw()
 
