@@ -1,4 +1,4 @@
-# Doing analyses of for Miranda Chiong's REU project
+# Doing analyses for Miranda Chiong's REU project
 # Steps have been largely copied from this doc: https://docs.google.com/document/d/1cBrNMVzRvO8HOBFZUrbWhPAdppvrLDYoRz0gSt-2cVg/edit
 
 # Workflow: 
@@ -94,6 +94,8 @@ for(i in 1:nrow(dfTree)){
   # (this would be VERY weird but we can deal with it later)
   if(length(rowMetaDat)==0) next 
   
+  dfTree[i,c("site", "taxon", "year.first", "year.last")] <- metaNOW[,c("site", "taxon", "year.first", "year.last")]
+  
   # Seeing if there is pith on the sample
   rowMaster <- which(lcwaMaster$SpecimenID==dfTree$treeID[i])
   # lcwaMaster[rowMaster,]
@@ -142,7 +144,6 @@ for(i in 1:nrow(dfTree)){
   xDateNOW <- xDateNOW[rowLOOK,]
   metaNOW <- series.metadata[rowMetaDat[rowLOOK],]
 
-  dfTree[i,c("site", "taxon", "year.first", "year.last")] <- metaNOW[,c("site", "taxon", "year.first", "year.last")]
   dfTree[i,c("nyr.SeriesMax", "file.use", "xDate.rho", "xDate.pval")] <- xDateNOW[,c("year", "series", "rho", "p.val")]
   
   # dfTree[i,]
