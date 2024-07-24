@@ -27,12 +27,12 @@ library(dplR)
 # setwd("~/Google Drive/My Drive/2024_REU_crossdate/Quercus RW Tridas")
 # setwd("~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/")
 #This should be your path but is not working on Mirada's file stream so commented out
-#path.dat <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/"
-#path.out <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/organized"
+path.dat <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/"
+path.out <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Raw Ring Widths/organized"
 
 #path to make this work on Mirada's computer. Path is Local ONLY TO Miranada's Computer
-path.dat <- "~/Desktop/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/"
-path.out <- "~/Desktop/Data/Raw Ring Widths/organized"
+# path.dat <- "~/Desktop/Data/Raw Ring Widths/Quercus REU 2024 - Second Pull/Quercus RW Tridas/"
+# path.out <- "~/Desktop/Data/Raw Ring Widths/organized"
 
 if(!dir.exists(path.out)) dir.create(path.out, recursive = T)
 
@@ -70,6 +70,10 @@ series.metadata <- data.frame(file=tridas.files, site=NA, taxon=NA, treeID=NA, c
 # first/last 0 Flag being if there are leading/trailing 0s we need to clean up and redate
 
 # names(tridas.data)
+# Problem files: QUERCS-134-U61-11-1-CR1b.xml, QUERCS-134-U61-11-1-CR1b.xml
+# Good File: UNKNWN-UNK-169-11-1-MC1.xml
+fBAD <- "QUERCS-134-U61-11-1-CR1b.xml" # This is our outlier in later stages
+fGOOD <- "UNKNWN-UNK-169-11-1-MC1.xml" # This is one from Miranda which isn't that weird
 
 # Loop through each file, clean it, and process it
 for (FILE in tridas.files) {
@@ -88,6 +92,7 @@ for (FILE in tridas.files) {
   tridas.data <- read.tridas(cleaned.file, ids.from.titles = TRUE, ids.from.identifiers = TRUE,
                              combine.series = TRUE, trim.whitespace = TRUE, warn.units = TRUE)
   
+  # summary(data.frame(tridas.data$measurements))
   # series.metadata[rowFile,]
   # tridas.data$unit
   if(max(tridas.data$measurements)<1 & tridas.data$unit=="millimetres") tridas.data$measurements <- tridas.data$measurements*100 # Things are being weird, but for now lets just hack this fix in 
@@ -118,6 +123,14 @@ series.metadata[rowBad,]
 filesBAD <- series.metadata$file[rowBad]
 
 rwlList <- rwl.objects[!names(rwl.objects) %in% filesBAD] # Just keeping the good ones
+
+# Checking on our weirdo and our okay reference
+summary(rwlList[[fBAD]])
+summary(rwlList[[fGOOD]])
+rwlList[[fBAD]][1:20,]
+rwlList[[fGOOD]][1:20,]
+# The measuremetns looks similar or the good should be higher!
+# summary(rwlList[,c(fBAD, fGOOD)])
 #####
 
 
@@ -162,6 +175,11 @@ dim(combined.rwl)
 #View(combined.rwl)
 summary(combined.rwl[,1:10])
 
+# Checking on our two reference series --> still looks okay
+summary(combined.rwl[,c(fBAD, fGOOD)])
+combined.rwl[1:20,c(fBAD, fGOOD)]
+
+
 # Get rid of leading and trailing 0s in our series
 # What Brendon had was a good start, but this will be a bit more robust
 for(i in 1:ncol(combined.rwl)){
@@ -178,7 +196,7 @@ for(i in 1:ncol(combined.rwl)){
   } else {
     print(paste0(fNow, ": removing leading 0s"))
     series.metadata$first0Flag[series.metadata$file==fNow] <- T
-    combined.rwl[1:rowfirstMeas,i] <- NA
+    combined.rwl[1:rowfirstDat,i] <- NA
   }
   
   # Deal with trailing 0s 
@@ -187,7 +205,7 @@ for(i in 1:ncol(combined.rwl)){
   } else {
     print(paste0(fNow, ": removing trailing 0s"))
     series.metadata$last0Flag[series.metadata$file==fNow] <- T
-    combined.rwl[rowlastMeas:nrow(combined.rwl),i] <- NA
+    combined.rwl[rowlastDat:nrow(combined.rwl),i] <- NA
   }
   
 }
@@ -195,6 +213,8 @@ for(i in 1:ncol(combined.rwl)){
 # Trim out rows that are all missing
 rows.dat <- apply(combined.rwl, 1, FUN=function(x){!all(is.na(x))})
 combined.rwl <- combined.rwl[rows.dat,]
+
+combined.rwl[1:20,c(fBAD, fGOOD)]
 
 # print out cores that need leading or trailing 0s fixed (to be redated)
 series.metadata[!is.na(series.metadata$first0Flag) & (series.metadata$first0Flag | series.metadata$last0Flag),]

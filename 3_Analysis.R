@@ -37,6 +37,11 @@ if(!dir.exists(path.out)) dir.create(path.out)
 
 dir(path.dat) # Seeing what info we have available to work with
 
+# Flagging a file that leads to an outlier in BAI.inc, which means we need to look closer at things
+fBAD <- "QUERCS-134-U61-11-1-CR1b.xml" # This is our outlier in later stages
+fGOOD <- "UNKNWN-UNK-169-11-1-MC1.xml" # This is one from Miranda which isn't that weird
+
+
 # Reading in all the stats about what tree things are form etc
 series.metadata <- read.csv(file.path(path.dat, "Series-Metadata_all.csv"))
 dim(series.metadata)# Checking dimensions to get a feel for how complex a set we're working with
