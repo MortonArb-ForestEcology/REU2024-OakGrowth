@@ -40,7 +40,8 @@ dir(path.dat) # Seeing what info we have available to work with
 # Flagging a file that leads to an outlier in BAI.inc, which means we need to look closer at things
 fBAD <- "QUERCS-134-U61-11-1-CR1b.xml" # This is our outlier in later stages
 fGOOD <- "UNKNWN-UNK-169-11-1-MC1.xml" # This is one from Miranda which isn't that weird
-
+sBAD <- gsub("-", ".", fBAD)
+sGOOD <- gsub("-", ".", fGOOD)
 
 # Reading in all the stats about what tree things are form etc
 series.metadata <- read.csv(file.path(path.dat, "Series-Metadata_all.csv"))
@@ -58,6 +59,8 @@ head(statsXdate) # lots of stuff is characters, so spitting out the first few ro
 seriesRW <- read.csv(file.path(path.dat, "Series-Measurements_all.csv"), row.names=1) # Years are the row names
 dim(seriesRW) # Checking the dimensions
 summary(seriesRW[,1:15]) # Doing a summary of just the first couple cols because there's a LOT of them
+seriesRW[1:20,c(sBAD, sGOOD)]
+
 
 # Also pulling in our LWCA master google sheet since it has info we care about
 sheetKey= "1iVB5--m29mLKhXUNgmc92wijQDg98L6FoKvsrJBDkRg" # This is the code that goes with the file called "LivingCollectionsArchive_Sample_Database
@@ -167,6 +170,15 @@ hist(dfTree$year.first[dfTree$pith.present]) # only those with pith
 
 # Subsetting seriesRW to just the series we want to use
 seriesRW <- seriesRW[,names(seriesRW) %in% dfTree$file.use]
+
+# Subsetting dfTree to be just the files we're using and ordering everything the same
+dfTree <- dfTree[!is.na(dfTree$file.use),]
+dim(seriesRW); dim(dfTree)
+
+seriesRW <- seriesRW[,dfTree$file.use]
+head(colnames(seriesRW))
+head(dfTree$file.use)
+length(which(is.na(dfTree$file.use)))
 # # # # # # # 
 
 # # # # # # # 
@@ -191,12 +203,14 @@ for(i in 1:ncol(dfAge)){
   dfAge[1:length(datNow),i] <- datNow
 }
 summary(dfAge[,1:3])
-
+head(dfAge[,c(sBAD, sGOOD)])
 
 # 2.2. calculate the mean for the establishment window: starting with 10 years for now (could try other windows)
-dfTree$RW.first10[dfTree$file.use %in% colnames(dfAge)] <-  apply(dfAge[1:10,], 2, "mean")
-dfTree$RW.first20[dfTree$file.use %in% colnames(dfAge)] <-  apply(dfAge[1:20,], 2, "mean")
+dfTree$RW.first10[dfTree$file.use %in% colnames(dfAge)] <-  apply(dfAge[1:10,], 2, mean)
+dfTree$RW.first20[dfTree$file.use %in% colnames(dfAge)] <-  apply(dfAge[1:20,], 2, mean)
 summary(dfTree)
+dfTree[dfTree$file.use %in% c(sBAD, sGOOD),]
+apply(dfAge[1:10,c(sBAD, sGOOD)], 2, mean)
 
 plot(x=dfTree$year.first, y=dfTree$RW.first10) # Quick exploratory scatter that Miranda had suggested
 

@@ -129,6 +129,8 @@ summary(rwlList[[fBAD]])
 summary(rwlList[[fGOOD]])
 rwlList[[fBAD]][1:20,]
 rwlList[[fGOOD]][1:20,]
+mean(rwlList[[fBAD]][1:10,])
+mean(rwlList[[fGOOD]][1:10,])
 # The measuremetns looks similar or the good should be higher!
 # summary(rwlList[,c(fBAD, fGOOD)])
 #####
