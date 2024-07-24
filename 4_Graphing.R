@@ -8,7 +8,7 @@
 #.     -- CR Note: This is the piece that will really be of most interest to folks at the Arboretum
 #  - 3.2. Describe the variability in growth rates during establishment --> is it a pretty tight/normal distribution or super variable?
 #  -- [[Added from CR: can look at the *trend* in initial growth and see if it's declining (sign of geometric decline; typical of open grown) or increasing or stead]]
-library(ggplot)
+library(ggplot2)
 
 path.out <- "~/Google Drive/My Drive/URF REU 2024 - Chiong - Oaks/Data/Analysis-Output"
 
@@ -19,6 +19,7 @@ dfTree <- read.csv(file.path(path.out, "TreeData_toAnalyze.csv"))
 dfTree$taxon <- as.factor(dfTree$taxon)
 summary(dfTree)
 
+dfTree[dfTree$BAI.first10>1e3 & !is.na(dfTree$BAI.first10),] # finding the outlier that shows up in some graphs
 
 # Creating a simplified genus & species columns for us
 dfTree[,c("genus", "sp.epith", "authority")] <- NA
